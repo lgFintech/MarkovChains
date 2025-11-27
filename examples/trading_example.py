@@ -7,10 +7,23 @@ This script shows how to:
 2. Fit a trading model on price data
 3. Generate trading signals
 4. Backtest a simple strategy
+
+Run from the repository root after installing:
+    pip install -e .
+    python examples/trading_example.py
 """
 
 import numpy as np
-from markov_chains import MarkovChain, TradingMarkovModel, MarketState
+
+# Try importing from installed package first, fall back to local source
+try:
+    from markov_chains import MarkovChain, TradingMarkovModel, MarketState
+except ImportError:
+    import sys
+    from pathlib import Path
+    # Add src directory to path for local development
+    sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+    from markov_chains import MarkovChain, TradingMarkovModel, MarketState
 
 
 def basic_markov_chain_example():

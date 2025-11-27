@@ -264,30 +264,33 @@ class TradingMarkovModel:
         position = 0  # 1 for long, 0 for flat, -1 for short (not implemented)
         trades = 0
         wins = 0
+        entry_capital = 0.0  # Track capital when entering a position
         
         for i, current_return in enumerate(returns[:-1]):
             signal = self.predict(current_return)
             next_return = returns[i + 1]
             
-            prev_position = position
-            
             if signal.action == "buy" and position == 0:
                 position = 1
                 capital *= (1 - transaction_cost)
+                entry_capital = capital
                 trades += 1
             elif signal.action == "sell" and position == 1:
+                # Check if this trade was profitable before closing
+                if capital > entry_capital:
+                    wins += 1
                 position = 0
                 capital *= (1 - transaction_cost)
-                trades += 1
             
             # Apply return if in position
             if position == 1:
                 capital *= (1 + next_return)
-                if next_return > 0:
-                    wins += 1
         
         # Close any open position at the end
         if position == 1:
+            # Count as win if profitable
+            if capital > entry_capital:
+                wins += 1
             capital *= (1 - transaction_cost)
         
         total_return = (capital - initial_capital) / initial_capital
